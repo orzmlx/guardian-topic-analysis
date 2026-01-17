@@ -1,0 +1,31 @@
+# Data files
+*.csv
+!guardian_news_std_sample.csv
+*.joblib
+*.pkl
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# LaTeX artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.toc
+
+# Output directories
+results_output/
+wordclouds/
