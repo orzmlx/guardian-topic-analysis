@@ -4,12 +4,12 @@
 \documentclass[11pt]{article}
 
 % ===== ACL style & basic packages =====
-% 注意：编译时需要 acl 样式文件（acl.sty 等），
-% 建议直接在 Overleaf 里使用官方 *ACL 模板，然后把本框架内容拷贝过去。
+% Use acl.sty for compilation,
+% Recommended to use the official *ACL template on Overleaf and copy the content of this framework.
 \usepackage[hyperref]{acl}
-\usepackage{lmodern}
-% Load microtype if available (allows compilation when package is missing)
-\IfFileExists{microtype.sty}{\usepackage{microtype}}{}
+\usepackage{mathptmx}
+\renewcommand{\ttdefault}{lmtt} % Use Latin Modern Typewriter to avoid Courier font issues
+% \usepackage{microtype} % Optional; try installing local microtype to improve micro-typography
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{latexsym}
@@ -17,12 +17,11 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{float}
-% \usepackage{microtype} % 可选；可尝试安装本地 microtype 来改善微排版
 
 % Title
-\title{Event-Driven Topic Shifts in The Guardian:\newline A Comparative Analysis of BERTopic and LDA around Queen Elizabeth II's Death}
+\title{Event-Driven Topic Shifts in The Guardian:\newline A Comparative Analysis of BERTopic and LDA around Queen Elizabeth II's Passing}
 
-% 多作者示例：用 \\ 换行分单位
+% Example for multiple authors: use \\ to separate lines
 \author{
   Liuxi Mei \\
   Department of Computer and Information Science \\
@@ -36,12 +35,12 @@
 
 % ============ Abstract ============
 \begin{abstract}
-  We analyze how The Guardian's news agenda shifted around Queen Elizabeth II's death, using topic modelling on articles from 2020--2025. To isolate indirect effects, we exclude direct event coverage via buffered windows and keyword filtering. We compare Latent Dirichlet Allocation (LDA) and BERTopic, employing a novel semantic alignment strategy to track evolving themes across independent models. Results reveal a significant "agenda reset": diffuse reporting declined while specific narratives—notably Economic Policy and Political Leadership—consolidated. BERTopic provided superior granularity in capturing these shifts compared to LDA. Our findings demonstrate that major events drive substantial structural changes in media agendas, with established themes briefly displaced before returning with altered intensity.
+  We analyze how The Guardian's news agenda shifted around Queen Elizabeth II's passing, using topic modelling on articles from 2020--2025. To isolate indirect effects, we exclude direct event coverage via buffered windows and keyword filtering. We compare Latent Dirichlet Allocation (LDA) and BERTopic, employing a novel semantic alignment strategy to track evolving themes across independent models. Results reveal a significant "agenda reset": diffuse reporting declined while specific narratives—notably Economic Policy and Political Leadership—consolidated. BERTopic provided superior granularity in capturing these shifts compared to LDA. Our findings demonstrate that major events drive substantial structural changes in media agendas, with established themes briefly displaced before returning with altered intensity.
 \end{abstract}
 
 % ============ 1 Introduction ============
 \section{Introduction}
-Major events can dramatically reshape media agendas \citep{mccombs1972agenda}, but measuring these shifts requires careful exclusion of event-dominated coverage. This study focuses on The Guardian's reporting before and after Queen Elizabeth II's death on September 8, 2022, a landmark event in UK history. We use topic modelling to quantify agenda changes, implementing buffered time windows and keyword-based filtering to remove direct event reports and obituaries. Our research questions are: (1) How do news topics shift around the event after excluding direct coverage? (2) How do LDA and BERTopic compare in capturing these shifts? (3) Are the observed changes robust to different modelling and filtering strategies?
+Major events can dramatically reshape media agendas \citep{mccombs1972agenda}, but measuring these shifts requires careful exclusion of event-dominated coverage. This study focuses on The Guardian's reporting before and after Queen Elizabeth II's passing on September 8, 2022, a landmark event in UK history. We use topic modelling to quantify agenda changes, implementing buffered time windows and keyword-based filtering to remove direct event reports and obituaries. Our research questions are: (1) How do news topics shift around the event after excluding direct coverage? (2) How do LDA and BERTopic compare in capturing these shifts? (3) Are the observed agenda changes statistically significant?
 
 Our contributions are: (1) A robust pipeline for event-exclusion in media agenda analysis; (2) Comparative evaluation of LDA and BERTopic on filtered Guardian news; (3) Statistical and temporal analysis confirming significant agenda shifts even after excluding direct event coverage.
 
@@ -125,11 +124,11 @@ Our work is closest in spirit to research that compares classical probabilistic 
 \section{Data}
 
 
-We collected The Guardian's English news articles from 2020 to 2025 using a custom-developed Python scraper (\texttt{guardian\_news\_scraper.py}) that interfaces directly with The Guardian Open Platform API. This approach ensured high-fidelity data retrieval, capturing essential metadata including UTC-standardized publication dates, titles, and section information. The study focuses on the period around Queen Elizabeth II's death on September 8, 2022. To avoid event-dominated coverage, we exclude articles within a 30-day buffer before and after the event, and filter out texts containing keywords such as "obituary", "death", "tribute", "funeral", and direct references to the Queen or monarchy. Minimal preprocessing is applied: lowercasing, stopword removal, and basic cleaning. The final dataset enables robust analysis of agenda shifts while minimizing confounding from direct event reporting.
+We collected The Guardian's English news articles from 2020 to 2025 using a custom-developed Python scraper (\texttt{guardian\_news\_scraper.py}) that interfaces directly with The Guardian Open Platform API. This approach ensured high-fidelity data retrieval, capturing essential metadata including UTC-standardized publication dates, titles, and section information. The study focuses on the period around Queen Elizabeth II's passing on September 8, 2022. To avoid event-dominated coverage, we exclude articles within a 30-day buffer before and after the event, and filter out texts containing keywords such as "obituary", "death", "tribute", "funeral", and direct references to the Queen or monarchy. Minimal preprocessing is applied: lowercasing, stopword removal, and basic cleaning. The final dataset enables robust analysis of agenda shifts while minimizing confounding from direct event reporting.
 
 We constructed a balanced dataset by randomly sampling 20,000 articles for each period (Pre and Post). This equal sampling size was chosen to (1) prevent volume bias in topic prevalence comparisons, ensuring that observed shifts reflect genuine proportional changes rather than dataset imbalances, and (2) maintain computational feasibility for the resource-intensive BERTopic embeddings.
 
-The pre-event period includes articles published before September 2022, while the post-event period includes those after. The 'filtered' designation indicates that direct event-related articles have been excluded. \#Documents denotes the number of articles in each split, and Avg. Tokens represents the average number of tokens per article after preprocessing.
+The pre-event period comprises articles published prior to the exclusion buffer, while the post-event period comprises those published after. The 'filtered' designation indicates that direct event-related articles have been excluded. \#Documents denotes the number of articles in each split, and Avg. Tokens represents the average number of tokens per article after preprocessing.
 
 
 % Dataset statistics (fill placeholders with Notebook outputs)
@@ -205,7 +204,7 @@ We construct a contingency table where rows represent aligned topics and columns
 \[
   \chi^2 = \sum_{i,j} \frac{(O_{ij}-E_{ij})^2}{E_{ij}},
 \]
-where $O_{ij}$ is the observed document count for topic $i$ in period $j$, and $E_{ij}$ is the expected count under $H_0$. A significant result leads to the rejection of $H_0$, confirming a structural break in the media agenda.
+where $O_{ij}$ is the observed document count for topic $i$ in period $j$, and $E_{ij}$ is the expected count under $H_0$. A significant result leads to the rejection of $H_0$, confirming a significant shift in the media agenda.
 
 \textbf{Z-test for Individual Topic Proportions:}
 For specific topics of interest (e.g., those showing large absolute changes), we perform a Z-test for the difference of two proportions to determine if the change in prevalence is statistically significant. The test statistic is given by:
@@ -217,7 +216,7 @@ where $\hat{p}_1$ and $\hat{p}_2$ are the sample proportions of the topic in the
 
 % ============ 5 Experiments ============
 \section{Experiments}
-We train LDA and BERTopic models on the filtered pre- and post-event corpora (Section~3). For BERTopic, we use \texttt{all-MiniLM-L6-v2} embeddings, UMAP, and HDBSCAN; for LDA, we use CountVectorizer and scikit-learn's implementation. Models were trained independently on the "no-event" subsets. Evaluation combines quantitative metrics (standard $C_v$ for BERTopic, $C_{UMass}$ for LDA) and qualitative inspection of top words and time series. Statistical tests include Pearson chi-square for distribution shifts and Z-tests for proportion differences.
+We train LDA and BERTopic models on the filtered pre- and post-event corpora (Section~3). For BERTopic, we use \texttt{all-MiniLM-L6-v2} embeddings, UMAP, and HDBSCAN; for LDA, we use CountVectorizer and scikit-learn's implementation. Models were trained independently on the event-excluded subsets. Evaluation combines quantitative metrics (standard $C_v$ for BERTopic, $C_{UMass}$ for LDA) and qualitative inspection of top words and time series. Statistical tests include Pearson chi-square for distribution shifts and Z-tests for proportion differences.
 
 % ============ 6 Analysis and Discussion ============
 \section{Analysis and Discussion}
@@ -225,11 +224,11 @@ Our semantic alignment reveals clear agenda shifts.
 
 \subsection{Aligned Topic Evolution}
 Figures~\ref{fig:topic-timeseries} and \ref{fig:lda-combined-timeseries} show weekly prevalence for top pre-event topics and their post-event matches.
-\textbf{BERTopic} (Figure~\ref{fig:topic-timeseries}) captures thematic continuity with distinct "dips" and "recoveries", validating the "agenda reset" hypothesis. Topics like "Political Leadership" show altered intensity post-event.
+\textbf{BERTopic} (Figure~\ref{fig:topic-timeseries}) captures thematic continuity with distinct "dips" and "recoveries", validating the "agenda reset" hypothesis. Topics like "Political Leadership" show increased prominence post-event.
 \textbf{LDA} (Figure~\ref{fig:lda-combined-timeseries}) shows coarser matches and flatter trends, as its bag-of-words nature blends distinct themes. BERTopic's sharper dynamics underscore its superior sensitivity to fine-grained shifts.
 
 \subsection{Quantitative Shifts and Statistical Significance}
-A Pearson chi-square test confirms a highly significant distribution change (\(\chi^2 = 491.618,\; p < 10^{-6}\)), indicating a structural break in the media agenda.
+A Pearson chi-square test confirms a highly significant distribution change (\(\chi^2 = 491.618,\; p < 10^{-6}\)), indicating a major shift in the media agenda.
 Z-tests pinpoint specific drivers: "Economic Policy" (Topic 0) surged from 1.59\% to 2.54\% ($Z \approx 6.58, p < 10^{-10}$), and "Political Leadership" (Topic 1) rose from 1.42\% to 2.09\% ($Z \approx 4.63, p < 10^{-5}$), confirming the consolidation of substantive narratives.
 
 Table~\ref{tab:summary-metrics} summarizes key metrics. Coherence scores confirm topic quality: BERTopic achieves solid $C_v$ values (Pre: 0.3950, Post: 0.4455), with a +0.05 post-event increase suggesting a more focused agenda. LDA's low $C_{UMass}$ scores (-5.27 to -4.65) reflect its struggle with short news texts. Qualitatively, BERTopic produces more coherent topics, and time series confirm these shifts are sustained, not transient.
@@ -239,10 +238,10 @@ Table~\ref{tab:summary-metrics} summarizes key metrics. Coherence scores confirm
 
 % ============ 7 Conclusion and Future Work ============
 \section{Conclusion and Future Work}
-We present a practical pipeline for measuring media agenda shifts around major events while minimizing the influence of direct event reports. Applied to The Guardian's coverage surrounding Queen Elizabeth II's death, our analysis reveals distinct differences in the news agenda. Despite excluding direct coverage, we observed a statistically significant "agenda reset": general "noise" or diffuse reporting decreased, while specific post-event narratives (e.g., Economic Policy, Political Leadership) saw consolidated growth (e.g., Topic 0 increasing from 318 to 508 documents). BERTopic proved superior to LDA in capturing these fine-grained shifts, showing how established themes were briefly displaced before returning with altered intensity. Future work should evaluate sensitivity to exclusion parameters and extend this analysis to multiple media outlets.
+We present a practical pipeline for measuring media agenda shifts around major events while minimizing the influence of direct event reports. Applied to The Guardian's coverage surrounding Queen Elizabeth II's passing, our analysis reveals distinct differences in the news agenda. Despite excluding direct coverage, we observed a statistically significant "agenda reset": general "noise" or diffuse reporting decreased, while specific post-event narratives (e.g., Economic Policy, Political Leadership) saw consolidated growth (e.g., Topic 0 increasing from 1.59\% to 2.54\%). BERTopic proved superior to LDA in capturing these fine-grained shifts, showing how established themes were briefly displaced before returning with altered intensity. Future work should evaluate sensitivity to exclusion parameters and extend this analysis to multiple media outlets.
 
 
-% ============ 8 Limitations (ACL 要求，简短即可) ============
+% ============ 8 Limitations (Brief as required by ACL) ============
 \section{Limitations}
 Our analysis is limited by the single-outlet scope (The Guardian) and the specific exclusion parameters (keyword list, 30-day buffer). While the buffer removes immediate event reports, indirect references likely remain. Additionally, our semantic alignment strategy assumes a 1-to-1 mapping between pre-event and post-event topics, which simplifies the reality where topics may split or merge (many-to-many). BERTopic also imposes higher computational costs compared to LDA. Future work should explore many-to-many alignment techniques and validate findings across broader news datasets.
 
@@ -252,7 +251,7 @@ Our analysis is limited by the single-outlet scope (The Guardian) and the specif
 
 % ============ References ============
 \bibliography{references}
-% 请在同一目录下创建 references.bib，并将所有引用文献放入其中；
-% 使用 \citep 和 \citet 等引用命令符合 *ACL 风格。
+% Please create references.bib in the same directory and put all citations in it;
+% Use citation commands like \citep and \citet to comply with *ACL style.
 
 \end{document}

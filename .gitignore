@@ -1,31 +1,56 @@
-# Data files
-*.csv
-!guardian_news_std_sample.csv
-*.joblib
-*.pkl
+# System & IDE
+.DS_Store
+.vscode/
+.idea/
+*.swp
 
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .ipynb_checkpoints/
-.DS_Store
-
-# Virtual Environment
 venv/
 env/
 .env
+*.egg-info/
 
-# LaTeX artifacts
+# Data
+*.csv
+# Keep the sample data for reproducibility
+!guardian_news_std_sample.csv
+*.zip
+*.tar.gz
+*.json
+*.pkl
+*.joblib
+*.model
+
+# LaTeX build artifacts
 *.aux
 *.bbl
 *.blg
 *.log
 *.out
-*.fdb_latexmk
-*.fls
-*.synctex.gz
 *.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.xdv
+*.pdf
+# Keep the final report PDF if desired, otherwise comment out the next line
+!project-acl.pdf
 
-# Output directories
+# Output directories & Generated Images
 results_output/
 wordclouds/
+*.png
+*.jpg
+*.jpeg
+*.eps
+
+# Clutter / Unwanted directories
+caption/
+lib/
