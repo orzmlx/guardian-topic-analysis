@@ -1,10 +1,10 @@
 """
-The Guardian 新闻爬虫
-====================
-使用 Guardian Open Platform API 获取 2008-2026 年新闻数据
-API 文档: https://open-platform.theguardian.com/documentation/
+The Guardian News Scraper
+=========================
+Fetch news data from 2008-2026 using The Guardian Open Platform API.
+API Documentation: https://open-platform.theguardian.com/documentation/
 
-Guardian API 免费版每天 5000 次请求，足够获取大量数据
+The free version of Guardian API allows 5000 requests per day, which is sufficient for fetching a large amount of data.
 """
 
 import requests
@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 class GuardianScraper:
-    """The Guardian 新闻爬虫"""
+    """The Guardian News Scraper"""
     
-    # Guardian 开放 API - 免费 test key（每天 500 次）
-    # 如需更多请求，可在 https://bonobo.capi.gutools.co.uk/register/developer 注册获取免费 key
-    DEFAULT_API_KEY = "test"  # 测试用 key
+    # Guardian Open API - Free test key (500 requests per day)
+    # For more requests, register for a free key at https://bonobo.capi.gutools.co.uk/register/developer
+    DEFAULT_API_KEY = "test"  # Test key
     
     def __init__(self, api_key=None):
         self.api_key = api_key or self.DEFAULT_API_KEY
@@ -35,14 +35,14 @@ class GuardianScraper:
     
     def fetch_articles(self, from_date, to_date, section=None, page_size=200, max_pages=50):
         """
-        从 Guardian API 获取文章
+        Fetch articles from Guardian API
         
-        参数:
-            from_date: 开始日期 (YYYY-MM-DD)
-            to_date: 结束日期 (YYYY-MM-DD)
-            section: 新闻分类 (world, uk-news, business, technology, etc.)
-            page_size: 每页结果数 (最大 200)
-            max_pages: 最大页数
+        Args:
+            from_date: Start date (YYYY-MM-DD)
+            to_date: End date (YYYY-MM-DD)
+            section: News section (world, uk-news, business, technology, etc.)
+            page_size: Number of results per page (max 200)
+            max_pages: Maximum number of pages to fetch
         """
         all_articles = []
         
@@ -87,27 +87,27 @@ class GuardianScraper:
                         all_articles.append(article)
                     
                     if page % 10 == 0:
-                        logger.info(f"  已获取 {len(all_articles)} 条 (页 {page}/{min(total_pages, max_pages)})")
+                        logger.info(f"  Fetched {len(all_articles)} articles (Page {page}/{min(total_pages, max_pages)})")
                     
                 elif resp.status_code == 429:
-                    logger.warning("API 限流，等待 60 秒...")
+                    logger.warning("API rate limit exceeded, waiting for 60 seconds...")
                     time.sleep(60)
                     continue
                 else:
-                    logger.warning(f"API 错误: {resp.status_code}")
+                    logger.warning(f"API Error: {resp.status_code}")
                     break
                     
             except Exception as e:
-                logger.error(f"请求失败: {e}")
+                logger.error(f"Request failed: {e}")
                 break
             
             page += 1
-            time.sleep(random.uniform(0.2, 0.5))  # 避免请求过快
+            time.sleep(random.uniform(0.2, 0.5))  # Avoid requesting too fast
         
         return all_articles
     
     def _format_date(self, iso_date):
-        """将 ISO 日期转换为与 BBC 相同的格式"""
+        """Convert ISO date to the same format as BBC (RFC 2822)"""
         try:
             dt = datetime.fromisoformat(iso_date.replace('Z', '+00:00'))
             return dt.strftime('%a, %d %b %Y %H:%M:%S GMT')
@@ -115,7 +115,7 @@ class GuardianScraper:
             return iso_date
     
     def fetch_by_year(self, year, sections=None):
-        """获取指定年份的新闻"""
+        """Fetch news for a specific year"""
         if sections is None:
             sections = [
                 'world', 'uk-news', 'business', 'technology',
@@ -125,37 +125,37 @@ class GuardianScraper:
         all_articles = []
         
         for section in sections:
-            logger.info(f"获取 {year} 年 {section} 新闻...")
+            logger.info(f"Fetching {section} news for {year}...")
             
             articles = self.fetch_articles(
                 from_date=f"{year}-01-01",
                 to_date=f"{year}-12-31",
                 section=section,
                 page_size=200,
-                max_pages=25  # 每个分类最多 5000 条
+                max_pages=25  # Max 5000 articles per section
             )
             
             all_articles.extend(articles)
-            logger.info(f"  {section}: {len(articles)} 条")
+            logger.info(f"  {section}: {len(articles)} articles")
             
             time.sleep(1)
         
         return all_articles
     
     def fetch_all_years(self, start_year=2008, end_year=2026):
-        """获取多年数据"""
+        """Fetch data for multiple years"""
         all_articles = []
         
-        # 重要新闻分类
+        # Main news sections
         main_sections = ['world', 'uk-news', 'business', 'politics']
         other_sections = ['technology', 'environment', 'science']
         
         for year in range(start_year, end_year + 1):
             logger.info(f"\n{'='*50}")
-            logger.info(f"获取 {year} 年新闻...")
+            logger.info(f"Fetching news for {year}...")
             logger.info(f"{'='*50}")
             
-            # 主要分类获取更多
+            # Fetch more for main sections
             for section in main_sections:
                 articles = self.fetch_articles(
                     from_date=f"{year}-01-01",
@@ -165,10 +165,10 @@ class GuardianScraper:
                     max_pages=15
                 )
                 all_articles.extend(articles)
-                logger.info(f"  {section}: {len(articles)} 条")
+                logger.info(f"  {section}: {len(articles)} articles")
                 time.sleep(0.5)
             
-            # 其他分类
+            # Other sections
             for section in other_sections:
                 articles = self.fetch_articles(
                     from_date=f"{year}-01-01",
@@ -178,17 +178,17 @@ class GuardianScraper:
                     max_pages=5
                 )
                 all_articles.extend(articles)
-                logger.info(f"  {section}: {len(articles)} 条")
+                logger.info(f"  {section}: {len(articles)} articles")
                 time.sleep(0.5)
             
             year_count = sum(1 for a in all_articles if str(year) in a.get('pubDate', ''))
-            logger.info(f"{year} 年共获取约 {year_count} 条")
+            logger.info(f"Fetched approximately {year_count} articles for {year}")
         
         return all_articles
 
 
 class GuardianRSSScraper:
-    """通过 RSS 获取 Guardian 最新新闻"""
+    """Fetch latest Guardian news via RSS"""
     
     RSS_FEEDS = {
         'world': 'https://www.theguardian.com/world/rss',
@@ -207,11 +207,11 @@ class GuardianRSSScraper:
         })
     
     def fetch_rss(self):
-        """获取所有 RSS 源的新闻"""
+        """Fetch news from all RSS feeds"""
         all_articles = []
         
         for section, rss_url in self.RSS_FEEDS.items():
-            logger.info(f"获取 RSS: {section}")
+            logger.info(f"Fetching RSS: {section}")
             
             try:
                 resp = self.session.get(rss_url, timeout=30)
@@ -230,11 +230,11 @@ class GuardianRSSScraper:
                         all_articles.append(article)
                         
             except Exception as e:
-                logger.warning(f"RSS 获取失败 {section}: {e}")
+                logger.warning(f"Failed to fetch RSS {section}: {e}")
             
             time.sleep(0.5)
         
-        logger.info(f"RSS 共获取 {len(all_articles)} 条")
+        logger.info(f"Fetched {len(all_articles)} articles via RSS")
         return all_articles
 
 
@@ -242,23 +242,23 @@ def main():
     output_dir = '/Users/liuxi/Desktop/text mining'
     
     print("=" * 60)
-    print("The Guardian 新闻爬虫")
+    print("The Guardian News Scraper")
     print("=" * 60)
     
-    # 1. 使用 API 获取历史数据
+    # 1. Fetch historical data using API
     scraper = GuardianScraper()
     
     all_articles = []
     
-    # 关键年份：获取更多数据
+    # Key years: fetch more data
     key_years = [2008, 2009, 2019, 2020, 2021]
     other_years = [y for y in range(2010, 2019)] + [2022, 2023, 2024, 2025, 2026]
     
-    # 获取关键年份（每年约 3000-5000 条）
-    logger.info("\n获取关键年份数据...")
+    # Fetch key years (approx. 3000-5000 articles per year)
+    logger.info("\nFetching data for key years...")
     for year in key_years:
         logger.info(f"\n{'='*40}")
-        logger.info(f"获取 {year} 年（关键年份）")
+        logger.info(f"Fetching {year} (Key Year)")
         
         sections = ['world', 'uk-news', 'business', 'politics', 'technology', 'environment']
         
@@ -271,13 +271,13 @@ def main():
                 max_pages=20
             )
             all_articles.extend(articles)
-            logger.info(f"  {year} {section}: {len(articles)} 条")
+            logger.info(f"  {year} {section}: {len(articles)} articles")
             time.sleep(0.3)
     
-    # 获取其他年份（每年约 1000-2000 条）
-    logger.info("\n获取其他年份数据...")
+    # Fetch other years (approx. 1000-2000 articles per year)
+    logger.info("\nFetching data for other years...")
     for year in other_years:
-        logger.info(f"\n获取 {year} 年")
+        logger.info(f"\nFetching {year}")
         
         sections = ['world', 'uk-news', 'business', 'politics']
         
@@ -293,18 +293,18 @@ def main():
             time.sleep(0.3)
         
         count = len([a for a in all_articles if str(year) in a.get('pubDate', '')])
-        logger.info(f"  {year} 年: ~{count} 条")
+        logger.info(f"  {year}: ~{count} articles")
     
-    # 2. 使用 RSS 获取最新数据
-    logger.info("\n获取 RSS 最新新闻...")
+    # 2. Fetch latest data using RSS
+    logger.info("\nFetching latest news via RSS...")
     try:
         rss_scraper = GuardianRSSScraper()
         rss_articles = rss_scraper.fetch_rss()
         all_articles.extend(rss_articles)
     except Exception as e:
-        logger.warning(f"RSS 获取失败: {e}")
+        logger.warning(f"RSS fetch failed: {e}")
     
-    # 3. 去重
+    # 3. Deduplication
     seen_titles = set()
     unique_articles = []
     for art in all_articles:
@@ -313,34 +313,34 @@ def main():
             seen_titles.add(title)
             unique_articles.append(art)
     
-    logger.info(f"\n去重后: {len(unique_articles)} 条")
+    logger.info(f"\nAfter deduplication: {len(unique_articles)} articles")
     
-    # 4. 保存为 CSV（与 bbc_news.csv 结构相同）
+    # 4. Save to CSV (same structure as bbc_news.csv)
     df = pd.DataFrame(unique_articles)
     
-    # 确保列顺序与 bbc_news.csv 相同
+    # Ensure column order matches bbc_news.csv
     cols = ['title', 'pubDate', 'guid', 'link', 'description']
     df = df[[c for c in cols if c in df.columns]]
     
-    # 保存
+    # Save
     output_path = os.path.join(output_dir, 'guardian_news.csv')
     df.to_csv(output_path, index=False)
     
-    # 5. 统计信息
+    # 5. Statistics
     print("\n" + "=" * 60)
-    print("✅ Guardian 新闻爬取完成!")
+    print("✅ Guardian News Fetching Complete!")
     print("=" * 60)
-    print(f"总计: {len(df)} 条新闻")
-    print(f"保存到: {output_path}")
+    print(f"Total: {len(df)} articles")
+    print(f"Saved to: {output_path}")
     
-    # 按年份统计
+    # Statistics by year
     def extract_year(date_str):
         match = re.search(r'(20\d{2})', str(date_str))
         return int(match.group(1)) if match else None
     
     df['year'] = df['pubDate'].apply(extract_year)
     
-    print("\n按年份分布:")
+    print("\nDistribution by Year:")
     year_counts = df['year'].value_counts().sort_index()
     for year, count in year_counts.items():
         if year and 2008 <= year <= 2026:
