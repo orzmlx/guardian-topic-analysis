@@ -1,50 +1,73 @@
-# *ACL Paper Styles
+# Event-Driven Topic Shifts in The Guardian: A Comparative Analysis of BERTopic and LDA
 
-This directory contains the latest LaTeX templates for *ACL conferences.
+This project analyzes how *The Guardian*'s news agenda shifted around Queen Elizabeth II's passing (September 8, 2022). By using topic modelling (LDA vs. BERTopic) on articles from 2020 to 2025, we investigate the "agenda reset" phenomenon, excluding direct event coverage to capture indirect thematic shifts.
 
-## Instructions for authors
+## 📂 Project Structure
 
-Paper submissions to *ACL conferences must use the official ACL style
-templates.
+The repository is organized as follows:
 
-The LaTeX style files are available
+```
+├── src/                # Source code
+│   ├── guardian_news_scraper.py      # Script to fetch data from Guardian API
+│   ├── guardian_lord_analysis_change.ipynb  # Main analysis notebook (Preprocessing, Modeling, Visualization)
+│   └── sample.py       # Helper scripts
+├── data/               # Data files
+│   ├── guardian_news_std.csv         # (Not included in repo due to size) Full dataset
+│   └── guardian_news_std_sample.csv  # Sample dataset for reproducibility
+├── report_latex/       # LaTeX source for the final report
+│   ├── project-acl.tex # Main LaTeX file
+│   └── project-acl.pdf # Compiled PDF report
+├── images/             # Generated figures and wordclouds
+│   ├── topic_time_series.png
+│   ├── lda_combined_time_series.png
+│   └── wordclouds/     # Topic wordclouds for LDA and BERTopic
+├── results_output/     # Intermediate analysis results (CSV)
+└── course_materials/   # Course-related documents and examples
+```
 
-- as an [Overleaf template](https://www.overleaf.com/latex/templates/association-for-computational-linguistics-acl-conference/jvxskxpnznfj)
-- in this repository
-- as a [.zip file](https://github.com/acl-org/acl-style-files/archive/refs/heads/master.zip)
+## 🚀 Getting Started
 
-Please see [`acl_latex.tex`](https://github.com/acl-org/acl-style-files/blob/master/acl_latex.tex) for an example.
+### Prerequisites
 
-Please follow the paper formatting guidelines general to *ACL
-conferences:
+Install the required Python packages:
 
-- [Paper formatting guidelines](https://acl-org.github.io/ACLPUB/formatting.html)
+```bash
+pip install -r requirements.txt
+```
 
-Authors may not modify these style files or use templates designed for
-other conferences.
+### 1. Data Collection
 
-## Instructions for publications chairs
+To fetch the news data yourself (requires a Guardian Open Platform API key), run:
 
-To adapt the style files for your conference, please fork this repository and
-make necessary changes. Minimally, you'll need to update the name of
-the conference and rename the files.
+```bash
+python src/guardian_news_scraper.py
+```
 
-If you make improvements to the templates that should be propagated to
-future conferences, please submit a pull request. Thank you in
-advance!
+*Note: The project already includes a sample dataset in `data/guardian_news_std_sample.csv`.*
 
-In older versions of the templates, authors were asked to fill in the
-START submission ID so that it would be stamped at the top of each
-page of the anonymized version. This is no longer needed, because it
-is now possible to do this stamping automatically within
-START. Currently, the way to do this is for the program chair to email
-support@softconf.com and request it.
+### 2. Analysis & Modeling
 
-## Instructions for making changes to style files
+The core analysis is performed in the Jupyter Notebook:
 
-- merge pull request in github, or push to github
-- git pull from github to a local repository
-- then, git push from your local repository to overleaf project 
-    - Overleaf project is https://www.overleaf.com/project/5f64f1fb97c4c50001b60549
-    - Overleaf git url is https://git.overleaf.com/5f64f1fb97c4c50001b60549
-- then, click "Submit" and then "Submit as Template" in overleaf in order to ask overleaf to update the overleaf template from the overleaf project 
+```bash
+jupyter notebook src/guardian_lord_analysis_change.ipynb
+```
+
+This notebook covers:
+- **Preprocessing**: Cleaning text, removing stopwords, and filtering event-related keywords.
+- **Modeling**: Training LDA and BERTopic models on Pre-event and Post-event datasets.
+- **Alignment**: Semantically aligning topics between time periods.
+- **Visualization**: Generating time series plots and word clouds (saved to `images/`).
+
+## 📊 Results
+
+The full analysis and findings are detailed in the **[Final Report](report_latex/project-acl.pdf)**.
+
+Key findings include:
+- A significant "agenda reset" was observed after the Queen's passing.
+- **Economic Policy** and **Political Leadership** topics consolidated and increased in prominence post-event.
+- **BERTopic** provided superior granularity and coherence compared to LDA in capturing these shifts.
+
+## 📝 License
+
+This project is part of the Text Mining course at Linköping University.
