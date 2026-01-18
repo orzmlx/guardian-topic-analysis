@@ -16,10 +16,9 @@ env/
 *.egg-info/
 
 # Data
-data/
+data/*
 *.csv
-# Keep the sample data for reproducibility
-!guardian_news_std_sample.csv
+!data/guardian_news_std_sample.csv
 *.zip
 *.tar.gz
 *.json
