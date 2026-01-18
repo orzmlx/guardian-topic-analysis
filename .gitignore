@@ -46,8 +46,8 @@ data/
 
 # Output directories & Generated Images
 results_output/
-images/
-*.png
+# images/  <-- Un-ignore images folder so we can track report figures
+# *.png    <-- Un-ignore pngs so we can track report figures
 *.jpg
 *.jpeg
 *.eps
