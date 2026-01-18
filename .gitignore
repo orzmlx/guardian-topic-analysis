@@ -16,6 +16,7 @@ env/
 *.egg-info/
 
 # Data
+data/
 *.csv
 # Keep the sample data for reproducibility
 !guardian_news_std_sample.csv
